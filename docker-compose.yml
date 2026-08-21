@@ -1,0 +1,55 @@
+services:         
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${PROJECT_SLUG}_${ENVIRONMENT}_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nodered:
+    image: nodered/node-red:latest
+    container_name: ${PROJECT_SLUG}_${ENVIRONMENT}_flow
+    restart: always
+    ports:
+      - "${NODERED_PORT}:1880"
+    volumes:
+      - nodered_data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_NAME: ${PROJECT_NAME}
+        NEXT_PUBLIC_APP_SLUG: ${PROJECT_SLUG}
+        NEXT_PUBLIC_APP_DESCRIPTION: ${PROJECT_DESCRIPTION}
+    container_name: ${PROJECT_SLUG}_${ENVIRONMENT}_frontend
+    restart: always
+    ports:
+      - "${NEXT_PORT}:3000"
+    environment:
+      - DATABASE_URL=${DB_PROVIDER}://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - NEXT_PUBLIC_APP_NAME=${PROJECT_NAME}
+      - NEXT_PUBLIC_APP_SLUG=${PROJECT_SLUG}
+      - NEXT_PUBLIC_APP_DESCRIPTION=${PROJECT_DESCRIPTION}
+    depends_on:
+      nodered:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  nodered_data:
