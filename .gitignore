@@ -11,3 +11,11 @@ flow/.config.json
 flow/.sessions.json
 flow/.npm/
 flow/.flows.json.backup
+flow/.config.nodes.json
+flow/.config.nodes.json.backup
+flow/.config.runtime.json
+flow/.config.runtime.json.backup
+flow/.config.projects.json
+flow/.config.projects.json.backup
+flow/.config.users.json
+flow/.config.users.json.backup
