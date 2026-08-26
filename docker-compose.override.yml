@@ -15,4 +15,30 @@ services:
     volumes:
       - ./frontend:/frontend
     command:
-      sh -c "npm install && npm run dev"
+      - sh
+      - -c
+      - |
+        if [ -f package.json ]; then
+          echo "package.json encontrado! Verificando dependências..."
+          # Só instala se o executável do Next.js não existir (evita loops e deixa o boot mais rápido)
+          if [ ! -f node_modules/.bin/next ]; then
+            echo "Dependências ausentes. Instalando..."
+            npm install
+          fi
+          npm run dev
+        else
+          echo "Nenhum package.json encontrado. Criando um novo projeto Next.js..."
+          npx create-next-app@latest temp-app --use-npm --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
+          
+          # CADEADO DE SEGURANÇA: Só copia os arquivos se a instalação foi realmente bem sucedida
+          if [ -f temp-app/node_modules/.bin/next ]; then
+            echo "Instalação validada! Copiando arquivos para o diretorio principal..."
+            cp -r temp-app/. .
+            rm -rf temp-app
+            npm run dev
+          else
+            echo "Erro na criação do projeto detectado (possível falha de rede). Limpando resíduos..."
+            rm -rf temp-app
+            exit 1
+          fi
+        fi
