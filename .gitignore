@@ -6,8 +6,9 @@ db_data/
 
 # Node-RED
 flow/node_modules/
-flow/*_cred.json
-flow/.sessions.json
+flow/projects/.sshkeys/
 flow/.npm/
+flow/.sessions.json
 flow/.flows.json.backup
 flow/.config*
+flow/*_cred.json
