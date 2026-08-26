@@ -1,1 +1,5 @@
-.env*
+# Banco de Dados
+db_data/
+
+# Variáveis de Ambiente
+.env
