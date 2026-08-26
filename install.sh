@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir ./flow ./db_data
+
 sudo chown -R $USER:$USER ./flow ./frontend
 docker compose up -d
 
